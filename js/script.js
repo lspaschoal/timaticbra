@@ -4,11 +4,11 @@ function consulta(pais) {
     } else {
         document.getElementById('padip').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_PADIP'));
         if (pais == 'AUS' || pais == 'CAN' || pais == 'USA'){
-            document.getElementById('padip').innerHTML += '\nPortadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
+            document.getElementById('padip').innerHTML += ' Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
         }
         document.getElementById('pasof').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_PASOF'));
         if (pais == 'AUS' || pais == 'CAN' || pais == 'USA'){
-            document.getElementById('pasof').innerHTML += '\nPortadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
+            document.getElementById('pasof').innerHTML += ' Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
         }
         document.getElementById('vivis').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_VIVIS'));
         getMaritimo(pais);
