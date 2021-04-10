@@ -1,64 +1,297 @@
-function consulta(pais) {
-    if (pais == "default") {
-        limpar();
-    } else {
-        document.getElementById('padip').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_PADIP'));
-        if (pais == 'AUS' || pais == 'CAN' || pais == 'USA'){
-            document.getElementById('padip').innerHTML += ' Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
-        }
-        document.getElementById('pasof').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_PASOF'));
-        if (pais == 'AUS' || pais == 'CAN' || pais == 'USA'){
-            document.getElementById('pasof').innerHTML += ' Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'
-        }
-        document.getElementById('vivis').innerHTML = localStorage.getItem(localStorage.getItem(pais + '_VIVIS'));
-        getMaritimo(pais);
+// Array de Países
+var paises = [
+    ['Afeganistão', '1', '1', '1', '0'],
+    ['África do Sul', '9', '9', '8', '0'],
+    ['Albânia', '12', '12', '8*', '1'],
+    ['Alemanha', '12', '12', '8*', '0'],
+    ['Andorra', '1', '1', '8', '0'],
+    ['Angola', '12', '12', '1', '0'],
+    ['Antígua e Barbuda', '12', '12', '8', '0'],
+    ['Arábia Saudita', '1', '1', '1', '0'],
+    ['Argélia', '12', '12', '1', '0'],
+    ['Argentina', '15', '12', '8#', '0'],
+    ['Armênia', '12', '12', '8', '0'],
+    ['Austrália', '11', '1¹', '8', '0'],
+    ['Áustria', '12', '12', '8', '0'],
+    ['Azerbaijão', '12', '12', '1', '1'],
+    ['Bahamas', '12', '12', '8', '1'],
+    ['Bahrein', '1', '1', '1', '0'],
+    ['Bangladesh', '1', '1', '1', '1'],
+    ['Barbados', '12', '12', '8', '0'],
+    ['Belarus', '12', '12', '8', '0'],
+    ['Bélgica', '12', '12', '8*', '0'],
+    ['Belize', '12', '12', '8', '0'],
+    ['Benin', '12', '12', '1', '0'],
+    ['Bolívia', '9', '9', '8#', '0'],
+    ['Bósnia', '12', '12', '8', '1'],
+    ['Botsuana', '11', '11', '1', '0'],
+    ['Brunei', '1', '1', '1', '0'],
+    ['Bulgária', '9', '9', '8*', '0'],
+    ['Burkina Faso', '12', '12', '1', '0'],
+    ['Burundi', '12', '12', '1', '0'],
+    ['Butão', '1', '1', '1', '0'],
+    ['Cabo Verde', '12', '12', '1', '0'],
+    ['Camboja', '11', '11', '1', '0'],
+    ['Cameroun', '12', '12', '1', '0'],
+    ['Canadá', '12', '1²', '8', '0'],
+    ['Catar', '12', '12', '8', '0'],
+    ['Cazaquistão', '12', '12', '2', '1'],
+    ['Chade', '1', '1', '1', '0'],
+    ['Chile', '12', '12', '8#', '0'],
+    ['China', '11', '11', '1', '0'],
+    ['Chipre', '9', '9', '8*', '0'],
+    ['Colômbia', '15', '12', '8#', '0'],
+    ['Comores', '1', '1', '1', '0'],
+    ['Congo, República do', '12', '12', '1', '0'],
+    ['Congo, República Democrática do', '1', '1', '1', '1'],
+    ['Cook, Ilhas', '1', '1', '1', '0'],
+    ['Coréia do Norte', '1', '1', '1', '0'],
+    ['Coréia do Sul', '12', '12', '8', '1'],
+    ['Costa do Marfim', '12', '12', '1', '0'],
+    ['Costa Rica', '12', '12', '8', '0'],
+    ['Croácia', '12', '12', '8', '1'],
+    ['Cuba', '13', '1', '1', '0'],
+    ['Dinamarca', '12', '12', '8*', '0'],
+    ['Djibouti', '1', '1', '1', '0'],
+    ['Dominica', '12', '12', '8*', '0'],
+    ['Egito', '9', '9', '1', '0'],
+    ['El Salvador', '9', '9', '8', '0'],
+    ['Emirados Árabes', '9', '9', '8', '0'],
+    ['Equador', '15', '12', '8#', '0'],
+    ['Eritréia', '1', '1', '1', '0'],
+    ['Eslováquia', '12', '12', '8', '0'],
+    ['Eslovênia', '12', '12', '8*', '0'],
+    ['Espanha', '12', '12', '8', '1'],
+    ['Estados Unidos', '13', '1³', '8', '0'],
+    ['Estônia', '9', '9', '8*', '0'],
+    ['Etiópia', '12', '12', '1', '0'],
+    ['Fiji, Ilhas', '12', '12', '8', '0'],
+    ['Filipinas', '13', '13', '8', '1'],
+    ['Finlândia', '12', '12', '8', '0'],
+    ['França', '9', '9', '8*', '1'],
+    ['Gabão', '12', '12', '1', '0'],
+    ['Gâmbia', '1', '1', '1', '0'],
+    ['Gana', '12', '12', '1', '0'],
+    ['Geórgia', '12', '12', '8*', '1'],
+    ['Granada', '12', '12', '8', '0'],
+    ['Grécia', '12', '12', '8*', '0'],
+    ['Guatemala', '9', '9', '8', '0'],
+    ['Guiana', '11', '11', '8', '0'],
+    ['Guiné', '1', '1', '1', '0'],
+    ['Guiné-Bissau', '12', '12', '1', '0'],
+    ['Guiné Equatorial', '10', '10', '1', '0'],
+    ['Haiti', '12', '12', '1', '0'],
+    ['Honduras', '12', '12', '8', '0'],
+    ['Hong Kong', '-', '-', '8', '0'],
+    ['Hungria', '12', '12', '8*', '1'],
+    ['Iêmen', '1', '1', '1', '1'],
+    ['Índia', '9', '9', '1', '1'],
+    ['Indonésia', '19', '19', '2', '1'],
+    ['Irã', '11', '1', '1', '0'],
+    ['Iraque', '1', '1', '1', '0'],
+    ['Irlanda', '15', '15', '8', '0'],
+    ['Islândia', '9', '9', '8', '0'],
+    ['Israel', '15', '12', '8', '0'],
+    ['Itália', '12', '12', '8*', '0'],
+    ['Jamaica', '12', '12', '8', '0'],
+    ['Japão', '12', '12', '8', '0'],
+    ['Jordânia', '11', '11', '1', '1'],
+    ['Kiribati', '1', '1', '1', '1'],
+    ['Kosovo', '16', '16', '16', '0'],
+    ['Kuwait', '1', '1', '1', '0'],
+    ['Laos', '12', '12', '1', '0'],
+    ['Lesoto', '1', '1', '1', '0'],
+    ['Letônia', '9', '9', '8*', '0'],
+    ['Líbano', '12', '12', '1', '0'],
+    ['Libéria', '1', '1', '1', '0'],
+    ['Líbia', '1', '1', '1', '0'],
+    ['Liechtenstein', '1', '1', '8', '0'],
+    ['Lituânia', '12', '12', '8*', '0'],
+    ['Luxemburgo', '12', '12', '8*', '1'],
+    ['Macau', '–', '–', '8', '0'],
+    ['Macedônia', '12', '12', '8*', '0'],
+    ['Madagascar', '1', '1', '1', '1'],
+    ['Malásia', '12', '12', '8', '0'],
+    ['Malawi', '9', '9', '1', '0'],
+    ['Maldivas', '1', '1', '1', '1'],
+    ['Mali', '12', '12', '1', '0'],
+    ['Malta', '9', '9', '8*', '0'],
+    ['Marianas, Ilhas', '1', '1', '1', '0'],
+    ['Marrocos', '12', '12', '8', '0'],
+    ['Marshall, Ilhas', '1', '1', '1', '0'],
+    ['Maurício', '1', '1', '1', '0'],
+    ['Mauritânia', '12', '12', '1', '0'],
+    ['México', '12', '12', '8', '0'],
+    ['Micronésia', '1', '1', '1', '0'],
+    ['Moçambique', '12', '12', '1', '0'],
+    ['Moldova', '12', '12', '1', '1'],
+    ['Mônaco', '1', '1', '8', '0'],
+    ['Mongólia', '12', '12', '8', '0'],
+    ['Montenegro', '12', '12', '8*', '1'],
+    ['Myanmar', '19', '19', '1', '1'],
+    ['Namíbia', '12', '12', '8', '0'],
+    ['Nauru', '1', '1', '1', '0'],
+    ['Nepal', '12', '12', '1', '0'],
+    ['Nicarágua', '12', '12', '8', '0'],
+    ['Níger', '1', '1', '1', '0'],
+    ['Nigéria', '10', '10', '1', '1'],
+    ['Noruega', '12', '12', '8', '0'],
+    ['Nova Zelândia', '1', '1', '8', '0'],
+    ['Omã', '10', '10', '1', '0'],
+    ['Ordem Soberana e Militar de Malta', '15', '15', '8', '0'],
+    ['Países Baixos', '9', '9', '8*', '0'],
+    ['Palau', '1', '1', '1', '0'],
+    ['Palestina', '1', '1', '1', '0'],
+    ['Panamá', '12', '12', '8', '0'],
+    ['Papua Nova Guiné', '1', '1', '1', '0'],
+    ['Paquistão', '9', '1', '1', '1'],
+    ['Paraguai', '15', '12', '8#', '0'],
+    ['Peru', '15', '13', '8#', '0'],
+    ['Polônia', '12', '12', '8', '0'],
+    ['Portugal', '12', '12', '8', '0'],
+    ['Quênia', '12', '12', '1', '0'],
+    ['Quirguistão', '12', '12', '1', '0'],
+    ['Reino Unido', '15', '15', '8', '0'],
+    ['República Árabe Saaraui Democrática (RASD)', '17', '17', '17', '0'],
+    ['República Centro-Africana', '1', '1', '1', '0'],
+    ['República Dominicana', '12', '12', '1', '0'],
+    ['República Tcheca', '12', '12', '8*', '0'],
+    ['Romênia', '12', '12', '8', '0'],
+    ['Ruanda', '1', '1', '1', '0'],
+    ['Rússia', '12', '12', '8', '1'],
+    ['Salomão, Ilhas', '1', '1', '1', '0'],
+    ['Samoa Ocidental', '1', '1', '1', '0'],
+    ['San Marino', '15', '15', '8', '0'],
+    ['Santa Lúcia', '12', '12', '1', '0'],
+    ['São Cristóvão e Nevis', '12', '12', '8', '0'],
+    ['São Tomé e Príncipe', '12', '12', '1', '0'],
+    ['São Vicente e Granadinas', '12', '12', '8', '0'],
+    ['Senegal', '12', '12', '1', '0'],
+    ['Serra Leoa', '1', '1', '1', '0'],
+    ['Sérvia', '12', '12', '8', '0'],
+    ['Seicheles', '12', '12', '8*', '0'],
+    ['Singapura', '11', '11', '2', '0'],
+    ['Síria', '1', '1', '1', '0'],
+    ['Somália', '1', '1', '1', '0'],
+    ['Sri Lanka', '12@', '12@', '1', '1'],
+    ['Suazilândia', '1', '1', '1', '0'],
+    ['Sudão', '11', '11', '1', '0'],
+    ['Sudão do Sul', '1', '1', '1', '0'],
+    ['Suécia', '12', '12', '8*', '0'],
+    ['Suíça', '12', '12', '8*', '0'],
+    ['Suriname', '9', '9', '8', '0'],
+    ['Tajiquistão', '1', '1', '1', '0'],
+    ['Tailândia', '12', '12', '8', '0'],
+    ['Taiwan', '16', '16', '18', '0'],
+    ['Tanzânia', '12', '12', '1', '1'],
+    ['Timor-Leste', '1', '1', '1', '0'],
+    ['Togo', '12', '12', '1', '0'],
+    ['Tonga', '1', '1', '1', '0'],
+    ['Trinidad e Tobago', '12', '12', '8', '0'],
+    ['Tunísia', '15', '13', '8', '1'],
+    ['Turcomenistão', '1', '1', '1', '1'],
+    ['Turquia', '12', '12', '8', '0'],
+    ['Tuvalu', '1', '1', '1', '0'],
+    ['Ucrânia', '12', '12', '8*', '0'],
+    ['Uganda', '1', '1', '1', '0'],
+    ['Uruguai', '15', '15', '8#', '0'],
+    ['Uzbequistão', '12', '1', '1', '0'],
+    ['Vanuatu', '1', '1', '1', '1'],
+    ['Vaticano', '15', '15', '8', '0'],
+    ['Venezuela', '12', '9', '7#', '0'],
+    ['Vietnã', '12', '12', '1', '0'],
+    ['Zâmbia', '12', '12', '1', '0'],
+    ['Zimbábue', '1', '1', '1', '0']
+];
+
+// Array de legenda
+var legenda = [
+    ['#', 'Ingresso permitido com Cédula de Identidade Civil'],
+    ['@', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, isenção pelo prazo da missão, inclusive para filhos dependentes com até 16 anos. Filhos dependentes, maiores de 16 anos, vistos por até 2 anos.'],
+    ['*', 'Máximo 90 dias de estada a cada 180 dias.'],
+    ['1', 'Visto exigido.'],
+    ['2', 'Dispensa de Visto, por até 30 dias.'],
+    ['7', 'Dispensa de Visto, por até 60 dias. Passaportes venezuelanos são válidos por 5 anos adicionais a partir da data de sua expiração.'],
+    ['8', 'Dispensa de Visto, por até 90 dias.'],
+    ['9', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Visto pelo prazo da missão.'],
+    ['10', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, dispensa de visto para entrar no território brasileiro, mas deverão solicitar ao MRE visto pelo prazo da missão no período de 30 (trinta) dias da primeira entrada.'],
+    ['11', 'Dispensa de Visto, por até 30 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.'],
+    ['12', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.'],
+    ['13', 'Dispensa de Visto, por até 180 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.'],
+    ['14', 'Dispensa de Visto, por até 14 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Visto pelo prazo da missão.'],
+    ['15', 'Isenção de Visto, por prazo indeterminado, para funcionários acreditados e não acreditados.'],
+    ['16', 'O Brasil não mantém relações diplomáticas. Visto concedido por até 90 dias. Não se concede Visto Diplomático ou Visto Oficial.'],
+    ['17', 'O Brasil não mantém relações diplomáticas. Visto concedido sobre "laissez-passer", por até 90 dias. Não se concede Visto Diplomático ou Oficial.'],
+    ['18', 'O Brasil não mantém relações diplomáticas. VIVIS concedido com validade de até 5 anos, com estada de até 90 dias e permanência total de até 180 dias por ano, contados da primeira entrada. Não se concede vistos em PADIP, PASOF ou PASER taiwanês.'],
+    ['19', 'Dispensa de Visto, por até 30 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, dispensa de visto para entrar no território brasileiro, mas deverão solicitar ao MRE visto pelo prazo da missão no período de 30 (trinta) dias da primeira entrada.'],
+    ['21', 'Dispensa de Visto por até 14 dias, prorrogáveis por período máximo de 90 dias a cada 12 meses.'],
+    ['¹', 'Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2019.'],
+    ['²', 'Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2020.'],
+    ['³', 'Portadores de PADIP e PASOF em viagem com propósito de visita farão jus à isenção do Decreto nº 9.731/2021.'],
+    ['-', 'Informação não disponível. Consultar um servidor.'],
+
+];
+
+/*
+    Funções
+*/
+function setSeletor() {
+    for (i = 0; i < paises.length; i++) {
+        document.getElementById('nome').innerHTML += "<option value='" + paises[i][0] + "'>" + paises[i][0] + "</option>";
     }
 }
+// Chamando a função na inicialização da página
+setSeletor();
 
-function getMaritimo(pais){
-    switch(pais){
-        case 'ALB':
-        case 'AZE':
-        case 'BHS':
-        case 'BGD':
-        case 'BIH':
-        case 'BRA':
-        case 'COG':
-        case 'HRV':
-        case 'FRA':
-        case 'GEO':
-        case 'HUN':
-        case 'IND':
-        case 'IDN':
-        case 'JOR':
-        case 'KAZ':
-        case 'KIR':
-        case 'LUX':
-        case 'MDG':
-        case 'MDV':
-        case 'MHL':
-        case 'MNE':
-        case 'MMR':
-        case 'NGA':
-        case 'PAK':
-        case 'PHL':
-        case 'KOR':
-        case 'MDA':
-        case 'RUS':
-        case 'ESP':
-        case 'LKA':
-        case 'TUN':
-        case 'TKM':
-        case 'TZA':
-        case 'VUT':
-        case 'YEM':
-            document.getElementById('maritimo').innerHTML = "País faz parte da convenção ILO C185.";
-            break;
-        default:
-            document.getElementById('maritimo').innerHTML = "País <strong>NÃO</strong> faz parte da convenção ILO C185.";
+// Retorna o índice do país informado
+function getIndice(pais) {
+    for (i = 0; i < paises.length; i++) {
+        if (paises[i][0] == pais) {
+            return i;
+        }
     }
+    return -1;
 }
 
+// Decodifica a legenda
+function decodifica(leg) {
+    var numeral = '', simbolo = [], resultado = '';
+    for (i = 0; i < leg.length; i++) {
+        switch (leg[i]) {
+            case '0':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+            case '9':
+                numeral += leg[i];
+                break;
+            default:
+                simbolo.push(leg[i]);
+        }
+    }
+    // Lendo a parte numeral
+    for (i = 0; i < legenda.length; i++) {
+        if (legenda[i][0] == numeral) {
+            resultado += legenda[i][1];
+        }
+    }
+    // Lendo os símbolos
+    for (i = 0; i < simbolo.length; i++) {
+        for (j = 0; j < legenda.length; j++) {
+            if (legenda[j][0] == simbolo[i]) {
+                resultado += ' ' + legenda[j][1];
+            }
+        }
+    }
+    return resultado;
+}
+
+// Função limpar
 function limpar() {
     document.getElementById('nome').value = 'default';
     document.getElementById('padip').innerHTML = "";
@@ -67,638 +300,60 @@ function limpar() {
     document.getElementById('maritimo').innerHTML = "";
 }
 
-// carregando as legendas
-localStorage.setItem('#', 'Ingresso permitido com Cédula de Identidade Civil.')
-localStorage.setItem('@', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, isenção pelo prazo da missão, inclusive para filhos dependentes com até 16 anos. Filhos dependentes, maiores de 16 anos, vistos por até 2 anos.')
-localStorage.setItem('*', 'Máximo 90 dias de estada a cada 180 dias.')
-localStorage.setItem('1', 'Visto exigido.')
-localStorage.setItem('2', 'Dispensa de Visto, por até 30 dias.')
-localStorage.setItem('7', 'Dispensa de Visto, por até 60 dias.')
-localStorage.setItem('8', 'Dispensa de Visto, por até 90 dias.')
-localStorage.setItem('9', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Visto pelo prazo da missão.')
-localStorage.setItem('10', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, dispensa de visto para entrar no território brasileiro, mas deverão solicitar ao MRE visto pelo prazo da missão no período de 30 (trinta) dias da primeira entrada.')
-localStorage.setItem('11', 'Dispensa de Visto, por até 30 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.')
-localStorage.setItem('12', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.')
-localStorage.setItem('13', 'Dispensa de Visto, por até 180 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Isenção pelo prazo da missão.')
-localStorage.setItem('14', 'Dispensa de Visto, por até 14 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, Visto pelo prazo da missão.')
-localStorage.setItem('15', 'Isenção de Visto, por prazo indeterminado, para funcionários acreditados e não acreditados.')
-localStorage.setItem('16', 'O Brasil não mantém relações diplomáticas. Visto concedido por até 90 dias. Não se concede Visto Diplomático ou Visto Oficial.')
-localStorage.setItem('17', 'O Brasil não mantém relações diplomáticas. Visto concedido sobre "laissez-passer", por até 90 dias. Não se concede Visto Diplomático ou Oficial.')
-localStorage.setItem('18', 'O Brasil não mantém relações diplomáticas. VIVIS concedido com validade de até 5 anos, com estada de até 90 dias e permanência total de até 180 dias por ano, contados da primeira entrada. Não se concede vistos em PADIP, PASOF ou PASER taiwanês.')
-localStorage.setItem('19', 'Dispensa de Visto, por até 30 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, dispensa de visto para entrar no território brasileiro, mas deverão solicitar ao MRE visto pelo prazo da missão no período de 30 (trinta) dias da primeira entrada.')
-localStorage.setItem('21', 'Dispensa de Visto por até 14 dias, prorrogáveis por período máximo de 90 dias a cada 12 meses.')
-localStorage.setItem('12@', 'Dispensa de Visto, por até 90 dias, para funcionários não acreditados no Brasil. Para funcionários acreditados, isenção pelo prazo da missão, inclusive para filhos dependentes com até 16 anos. Filhos dependentes, maiores de 16 anos, vistos por até 2 anos.')
-localStorage.setItem('8*', 'Dispensa de Visto, por até 90 dias. Máximo 90 dias de estada a cada 180 dias.')
-localStorage.setItem('8#', 'Dispensa de Visto, por até 90 dias. Ingresso permitido com Cédula de Identidade Civil.')
-localStorage.setItem('7#', 'Dispensa de Visto, por até 60 dias. Ingresso permitido com Cédula de Identidade Civil.')
+// Método de consulta do país
+function consulta(pais) {
+    if (pais == 'default') {
+        limpar();
+    } else {
+        indicePais = getIndice(pais);
+        // Campo PADIP
+        document.getElementById('padip').innerHTML = decodifica(paises[indicePais][1]);
+        // Campo PASOF
+        document.getElementById('pasof').innerHTML = decodifica(paises[indicePais][2]);
+        // Campo VIVIS
+        document.getElementById('vivis').innerHTML = decodifica(paises[indicePais][3]);
+        // Campo Marítimo
+        if (paises[indicePais][4] == '1') {
+            document.getElementById('maritimo').innerHTML = pais + " faz parte da convenção OIT 185.<br>";
+            if (document.getElementById('vivis').innerHTML.indexOf('Visto exigido') > -1) {
+                document.getElementById('maritimo').innerHTML += imprimeMaritimo(true, true);
+            } else {
+                document.getElementById('maritimo').innerHTML += imprimeMaritimo(true, false);
+            }
+        } else {
+            document.getElementById('maritimo').innerHTML = pais + " NÃO faz parte da convenção OIT 185.<br>"
+            if (document.getElementById('vivis').innerHTML.indexOf('Visto exigido') > -1) {
+                document.getElementById('maritimo').innerHTML += imprimeMaritimo(false, true);
+            } else {
+                document.getElementById('maritimo').innerHTML += imprimeMaritimo(false, false);
+            }
+        }
+    }
+}
 
-// carregando os dados
-
-//PADIP
-localStorage.setItem('AFG_PADIP', '1')
-localStorage.setItem('ZAF_PADIP', '9')
-localStorage.setItem('ALB_PADIP', '12')
-localStorage.setItem('DEU_PADIP', '12')
-localStorage.setItem('AND_PADIP', '1')
-localStorage.setItem('AGO_PADIP', '12')
-localStorage.setItem('ATG_PADIP', '12')
-localStorage.setItem('SAU_PADIP', '1')
-localStorage.setItem('DZA_PADIP', '12')
-localStorage.setItem('ARG_PADIP', '15')
-localStorage.setItem('ARM_PADIP', '12')
-localStorage.setItem('AUS_PADIP', '1')
-localStorage.setItem('AUT_PADIP', '12')
-localStorage.setItem('AZE_PADIP', '12')
-localStorage.setItem('BHS_PADIP', '12')
-localStorage.setItem('BHR_PADIP', '1')
-localStorage.setItem('BGD_PADIP', '1')
-localStorage.setItem('BRB_PADIP', '12')
-localStorage.setItem('BLR_PADIP', '12')
-localStorage.setItem('BEL_PADIP', '12')
-localStorage.setItem('BLZ_PADIP', '12')
-localStorage.setItem('BEN_PADIP', '12')
-localStorage.setItem('BOL_PADIP', '9')
-localStorage.setItem('BIH_PADIP', '12')
-localStorage.setItem('BWA_PADIP', '11')
-localStorage.setItem('BRN_PADIP', '1')
-localStorage.setItem('BGR_PADIP', '9')
-localStorage.setItem('BFA_PADIP', '12')
-localStorage.setItem('BDI_PADIP', '12')
-localStorage.setItem('BTN_PADIP', '1')
-localStorage.setItem('CPV_PADIP', '12')
-localStorage.setItem('KHM_PADIP', '11')
-localStorage.setItem('CMR_PADIP', '12')
-localStorage.setItem('CAN_PADIP', '1')
-localStorage.setItem('QAT_PADIP', '12')
-localStorage.setItem('KAZ_PADIP', '12')
-localStorage.setItem('TCD_PADIP', '1')
-localStorage.setItem('CHL_PADIP', '12')
-localStorage.setItem('CHN_PADIP', '11')
-localStorage.setItem('CYP_PADIP', '9')
-localStorage.setItem('COL_PADIP', '15')
-localStorage.setItem('COM_PADIP', '1')
-localStorage.setItem('COG_PADIP', '12')
-localStorage.setItem('COD_PADIP', '1')
-localStorage.setItem('COK_PADIP', '1')
-localStorage.setItem('PRK_PADIP', '1')
-localStorage.setItem('KOR_PADIP', '12')
-localStorage.setItem('CIV_PADIP', '12')
-localStorage.setItem('CRI_PADIP', '12')
-localStorage.setItem('HRV_PADIP', '12')
-localStorage.setItem('CUB_PADIP', '13')
-localStorage.setItem('DNK_PADIP', '12')
-localStorage.setItem('DJI_PADIP', '1')
-localStorage.setItem('DMA_PADIP', '12')
-localStorage.setItem('EGY_PADIP', '9')
-localStorage.setItem('SLV_PADIP', '9')
-localStorage.setItem('ARE_PADIP', '9')
-localStorage.setItem('ECU_PADIP', '15')
-localStorage.setItem('ERI_PADIP', '1')
-localStorage.setItem('SVK_PADIP', '12')
-localStorage.setItem('SVN_PADIP', '12')
-localStorage.setItem('ESP_PADIP', '12')
-localStorage.setItem('USA_PADIP', '1')
-localStorage.setItem('EST_PADIP', '9')
-localStorage.setItem('ETH_PADIP', '12')
-localStorage.setItem('FJI_PADIP', '12')
-localStorage.setItem('PHL_PADIP', '13')
-localStorage.setItem('FIN_PADIP', '12')
-localStorage.setItem('FRA_PADIP', '9')
-localStorage.setItem('GAB_PADIP', '12')
-localStorage.setItem('GMB_PADIP', '1')
-localStorage.setItem('GHA_PADIP', '12')
-localStorage.setItem('GEO_PADIP', '12')
-localStorage.setItem('GRD_PADIP', '12')
-localStorage.setItem('GRC_PADIP', '12')
-localStorage.setItem('GTM_PADIP', '9')
-localStorage.setItem('GUY_PADIP', '11')
-localStorage.setItem('GIN_PADIP', '1')
-localStorage.setItem('GNB_PADIP', '12')
-localStorage.setItem('GNQ_PADIP', '10')
-localStorage.setItem('HTI_PADIP', '12')
-localStorage.setItem('HND_PADIP', '12')
-localStorage.setItem('HKG_PADIP', '-')
-localStorage.setItem('HUN_PADIP', '12')
-localStorage.setItem('YEM_PADIP', '1')
-localStorage.setItem('IND_PADIP', '9')
-localStorage.setItem('IDN_PADIP', '19')
-localStorage.setItem('IRN_PADIP', '11')
-localStorage.setItem('IRQ_PADIP', '1')
-localStorage.setItem('IRL_PADIP', '15')
-localStorage.setItem('ISL_PADIP', '9')
-localStorage.setItem('ISR_PADIP', '15')
-localStorage.setItem('ITA_PADIP', '12')
-localStorage.setItem('JAM_PADIP', '12')
-localStorage.setItem('JPN_PADIP', '12')
-localStorage.setItem('JOR_PADIP', '11')
-localStorage.setItem('KIR_PADIP', '1')
-localStorage.setItem('KOS_PADIP', '16')
-localStorage.setItem('KWT_PADIP', '1')
-localStorage.setItem('LAO_PADIP', '12')
-localStorage.setItem('LSO_PADIP', '1')
-localStorage.setItem('LVA_PADIP', '9')
-localStorage.setItem('LBN_PADIP', '12')
-localStorage.setItem('LBR_PADIP', '1')
-localStorage.setItem('LBY_PADIP', '1')
-localStorage.setItem('LIE_PADIP', '1')
-localStorage.setItem('LTU_PADIP', '12')
-localStorage.setItem('LUX_PADIP', '12')
-localStorage.setItem('MAC_PADIP', '–')
-localStorage.setItem('MKD_PADIP', '12')
-localStorage.setItem('MDG_PADIP', '1')
-localStorage.setItem('MYS_PADIP', '12')
-localStorage.setItem('MWI_PADIP', '9')
-localStorage.setItem('MDV_PADIP', '1')
-localStorage.setItem('MLI_PADIP', '12')
-localStorage.setItem('MLT_PADIP', '9')
-localStorage.setItem('MNP_PADIP', '1')
-localStorage.setItem('MAR_PADIP', '12')
-localStorage.setItem('MHL_PADIP', '1')
-localStorage.setItem('MUS_PADIP', '1')
-localStorage.setItem('MRT_PADIP', '12')
-localStorage.setItem('MEX_PADIP', '12')
-localStorage.setItem('FSM_PADIP', '1')
-localStorage.setItem('MOZ_PADIP', '12')
-localStorage.setItem('MDA_PADIP', '12')
-localStorage.setItem('MCO_PADIP', '1')
-localStorage.setItem('MNG_PADIP', '12')
-localStorage.setItem('MNE_PADIP', '12')
-localStorage.setItem('MMR_PADIP', '19')
-localStorage.setItem('NAM_PADIP', '12')
-localStorage.setItem('NRU_PADIP', '1')
-localStorage.setItem('NPL_PADIP', '12')
-localStorage.setItem('NIC_PADIP', '12')
-localStorage.setItem('NER_PADIP', '1')
-localStorage.setItem('NGA_PADIP', '10')
-localStorage.setItem('NOR_PADIP', '12')
-localStorage.setItem('NZL_PADIP', '1')
-localStorage.setItem('OMN_PADIP', '10')
-localStorage.setItem('OSMM_PADIP', '15')
-localStorage.setItem('NLD_PADIP', '9')
-localStorage.setItem('PLW_PADIP', '1')
-localStorage.setItem('PSE_PADIP', '1')
-localStorage.setItem('PAN_PADIP', '12')
-localStorage.setItem('PNG_PADIP', '1')
-localStorage.setItem('PAK_PADIP', '9')
-localStorage.setItem('PRY_PADIP', '15')
-localStorage.setItem('PER_PADIP', '15')
-localStorage.setItem('POL_PADIP', '12')
-localStorage.setItem('PRT_PADIP', '12')
-localStorage.setItem('KEN_PADIP', '12')
-localStorage.setItem('KGZ_PADIP', '12')
-localStorage.setItem('GBR_PADIP', '15')
-localStorage.setItem('RASD_PADIP', '17')
-localStorage.setItem('CAF_PADIP', '1')
-localStorage.setItem('DOM_PADIP', '12')
-localStorage.setItem('CZE_PADIP', '12')
-localStorage.setItem('ROU_PADIP', '12')
-localStorage.setItem('RWA_PADIP', '1')
-localStorage.setItem('RUS_PADIP', '12')
-localStorage.setItem('SLB_PADIP', '1')
-localStorage.setItem('WSM_PADIP', '1')
-localStorage.setItem('SMR_PADIP', '15')
-localStorage.setItem('LCA_PADIP', '12')
-localStorage.setItem('KNA_PADIP', '12')
-localStorage.setItem('STP_PADIP', '12')
-localStorage.setItem('VCT_PADIP', '12')
-localStorage.setItem('SEN_PADIP', '12')
-localStorage.setItem('SLE_PADIP', '1')
-localStorage.setItem('SRB_PADIP', '12')
-localStorage.setItem('SYC_PADIP', '12')
-localStorage.setItem('SGP_PADIP', '11')
-localStorage.setItem('SYR_PADIP', '1')
-localStorage.setItem('SOM_PADIP', '1')
-localStorage.setItem('LKA_PADIP', '12@')
-localStorage.setItem('SWZ_PADIP', '1')
-localStorage.setItem('SDN_PADIP', '11')
-localStorage.setItem('SSD_PADIP', '1')
-localStorage.setItem('SWE_PADIP', '12')
-localStorage.setItem('CHE_PADIP', '12')
-localStorage.setItem('SUR_PADIP', '9')
-localStorage.setItem('TJK_PADIP', '1')
-localStorage.setItem('THA_PADIP', '12')
-localStorage.setItem('TWN_PADIP', '16')
-localStorage.setItem('TZA_PADIP', '12')
-localStorage.setItem('TLS_PADIP', '1')
-localStorage.setItem('TGO_PADIP', '12')
-localStorage.setItem('TON_PADIP', '1')
-localStorage.setItem('TTO_PADIP', '12')
-localStorage.setItem('TUN_PADIP', '15')
-localStorage.setItem('TKM_PADIP', '1')
-localStorage.setItem('TUR_PADIP', '12')
-localStorage.setItem('TUV_PADIP', '1')
-localStorage.setItem('UKR_PADIP', '12')
-localStorage.setItem('UGA_PADIP', '1')
-localStorage.setItem('URY_PADIP', '15')
-localStorage.setItem('UZB_PADIP', '12')
-localStorage.setItem('VUT_PADIP', '1')
-localStorage.setItem('VAT_PADIP', '15')
-localStorage.setItem('VEN_PADIP', '12')
-localStorage.setItem('VNM_PADIP', '12')
-localStorage.setItem('ZMB_PADIP', '12')
-
-//PASOF
-localStorage.setItem('AFG_PASOF', '1')
-localStorage.setItem('ZAF_PASOF', '9')
-localStorage.setItem('ALB_PASOF', '12')
-localStorage.setItem('DEU_PASOF', '12')
-localStorage.setItem('AND_PASOF', '1')
-localStorage.setItem('AGO_PASOF', '12')
-localStorage.setItem('ATG_PASOF', '12')
-localStorage.setItem('SAU_PASOF', '1')
-localStorage.setItem('DZA_PASOF', '12')
-localStorage.setItem('ARG_PASOF', '12')
-localStorage.setItem('ARM_PASOF', '12')
-localStorage.setItem('AUS_PASOF', '1')
-localStorage.setItem('AUT_PASOF', '12')
-localStorage.setItem('AZE_PASOF', '12')
-localStorage.setItem('BHS_PASOF', '12')
-localStorage.setItem('BHR_PASOF', '1')
-localStorage.setItem('BGD_PASOF', '1')
-localStorage.setItem('BRB_PASOF', '12')
-localStorage.setItem('BLR_PASOF', '12')
-localStorage.setItem('BEL_PASOF', '12')
-localStorage.setItem('BLZ_PASOF', '12')
-localStorage.setItem('BEN_PASOF', '12')
-localStorage.setItem('BOL_PASOF', '9')
-localStorage.setItem('BIH_PASOF', '12')
-localStorage.setItem('BWA_PASOF', '11')
-localStorage.setItem('BRN_PASOF', '1')
-localStorage.setItem('BGR_PASOF', '9')
-localStorage.setItem('BFA_PASOF', '12')
-localStorage.setItem('BDI_PASOF', '12')
-localStorage.setItem('BTN_PASOF', '1')
-localStorage.setItem('CPV_PASOF', '12')
-localStorage.setItem('KHM_PASOF', '11')
-localStorage.setItem('CMR_PASOF', '12')
-localStorage.setItem('CAN_PASOF', '1')
-localStorage.setItem('QAT_PASOF', '12')
-localStorage.setItem('KAZ_PASOF', '12')
-localStorage.setItem('TCD_PASOF', '1')
-localStorage.setItem('CHL_PASOF', '12')
-localStorage.setItem('CHN_PASOF', '11')
-localStorage.setItem('CYP_PASOF', '9')
-localStorage.setItem('COL_PASOF', '12')
-localStorage.setItem('COM_PASOF', '1')
-localStorage.setItem('COG_PASOF', '12')
-localStorage.setItem('COD_PASOF', '1')
-localStorage.setItem('COK_PASOF', '1')
-localStorage.setItem('PRK_PASOF', '1')
-localStorage.setItem('KOR_PASOF', '12')
-localStorage.setItem('CIV_PASOF', '12')
-localStorage.setItem('CRI_PASOF', '12')
-localStorage.setItem('HRV_PASOF', '12')
-localStorage.setItem('CUB_PASOF', '1')
-localStorage.setItem('DNK_PASOF', '12')
-localStorage.setItem('DJI_PASOF', '1')
-localStorage.setItem('DMA_PASOF', '12')
-localStorage.setItem('EGY_PASOF', '9')
-localStorage.setItem('SLV_PASOF', '9')
-localStorage.setItem('ARE_PASOF', '9')
-localStorage.setItem('ECU_PASOF', '12')
-localStorage.setItem('ERI_PASOF', '1')
-localStorage.setItem('SVK_PASOF', '12')
-localStorage.setItem('SVN_PASOF', '12')
-localStorage.setItem('ESP_PASOF', '12')
-localStorage.setItem('USA_PASOF', '1')
-localStorage.setItem('EST_PASOF', '9')
-localStorage.setItem('ETH_PASOF', '12')
-localStorage.setItem('FJI_PASOF', '12')
-localStorage.setItem('PHL_PASOF', '13')
-localStorage.setItem('FIN_PASOF', '12')
-localStorage.setItem('FRA_PASOF', '9')
-localStorage.setItem('GAB_PASOF', '12')
-localStorage.setItem('GMB_PASOF', '1')
-localStorage.setItem('GHA_PASOF', '12')
-localStorage.setItem('GEO_PASOF', '12')
-localStorage.setItem('GRD_PASOF', '12')
-localStorage.setItem('GRC_PASOF', '12')
-localStorage.setItem('GTM_PASOF', '9')
-localStorage.setItem('GUY_PASOF', '11')
-localStorage.setItem('GIN_PASOF', '1')
-localStorage.setItem('GNB_PASOF', '12')
-localStorage.setItem('GNQ_PASOF', '10')
-localStorage.setItem('HTI_PASOF', '12')
-localStorage.setItem('HND_PASOF', '12')
-localStorage.setItem('HKG_PASOF', '-')
-localStorage.setItem('HUN_PASOF', '12')
-localStorage.setItem('YEM_PASOF', '1')
-localStorage.setItem('IND_PASOF', '9')
-localStorage.setItem('IDN_PASOF', '19')
-localStorage.setItem('IRN_PASOF', '1')
-localStorage.setItem('IRQ_PASOF', '1')
-localStorage.setItem('IRL_PASOF', '15')
-localStorage.setItem('ISL_PASOF', '9')
-localStorage.setItem('ISR_PASOF', '12')
-localStorage.setItem('ITA_PASOF', '12')
-localStorage.setItem('JAM_PASOF', '12')
-localStorage.setItem('JPN_PASOF', '12')
-localStorage.setItem('JOR_PASOF', '11')
-localStorage.setItem('KIR_PASOF', '1')
-localStorage.setItem('KOS_PASOF', '16')
-localStorage.setItem('KWT_PASOF', '1')
-localStorage.setItem('LAO_PASOF', '12')
-localStorage.setItem('LSO_PASOF', '1')
-localStorage.setItem('LVA_PASOF', '9')
-localStorage.setItem('LBN_PASOF', '12')
-localStorage.setItem('LBR_PASOF', '1')
-localStorage.setItem('LBY_PASOF', '1')
-localStorage.setItem('LIE_PASOF', '1')
-localStorage.setItem('LTU_PASOF', '12')
-localStorage.setItem('LUX_PASOF', '12')
-localStorage.setItem('MAC_PASOF', '–')
-localStorage.setItem('MKD_PASOF', '12')
-localStorage.setItem('MDG_PASOF', '1')
-localStorage.setItem('MYS_PASOF', '12')
-localStorage.setItem('MWI_PASOF', '9')
-localStorage.setItem('MDV_PASOF', '1')
-localStorage.setItem('MLI_PASOF', '12')
-localStorage.setItem('MLT_PASOF', '9')
-localStorage.setItem('MNP_PASOF', '1')
-localStorage.setItem('MAR_PASOF', '12')
-localStorage.setItem('MHL_PASOF', '1')
-localStorage.setItem('MUS_PASOF', '1')
-localStorage.setItem('MRT_PASOF', '12')
-localStorage.setItem('MEX_PASOF', '12')
-localStorage.setItem('FSM_PASOF', '1')
-localStorage.setItem('MOZ_PASOF', '12')
-localStorage.setItem('MDA_PASOF', '12')
-localStorage.setItem('MCO_PASOF', '1')
-localStorage.setItem('MNG_PASOF', '12')
-localStorage.setItem('MNE_PASOF', '12')
-localStorage.setItem('MMR_PASOF', '19')
-localStorage.setItem('NAM_PASOF', '12')
-localStorage.setItem('NRU_PASOF', '1')
-localStorage.setItem('NPL_PASOF', '12')
-localStorage.setItem('NIC_PASOF', '12')
-localStorage.setItem('NER_PASOF', '1')
-localStorage.setItem('NGA_PASOF', '10')
-localStorage.setItem('NOR_PASOF', '12')
-localStorage.setItem('NZL_PASOF', '1')
-localStorage.setItem('OMN_PASOF', '10')
-localStorage.setItem('OSMM_PASOF', '15')
-localStorage.setItem('NLD_PASOF', '9')
-localStorage.setItem('PLW_PASOF', '1')
-localStorage.setItem('PSE_PASOF', '1')
-localStorage.setItem('PAN_PASOF', '12')
-localStorage.setItem('PNG_PASOF', '1')
-localStorage.setItem('PAK_PASOF', '1')
-localStorage.setItem('PRY_PASOF', '12')
-localStorage.setItem('PER_PASOF', '13')
-localStorage.setItem('POL_PASOF', '12')
-localStorage.setItem('PRT_PASOF', '12')
-localStorage.setItem('KEN_PASOF', '12')
-localStorage.setItem('KGZ_PASOF', '12')
-localStorage.setItem('GBR_PASOF', '15')
-localStorage.setItem('RASD_PASOF', '17')
-localStorage.setItem('CAF_PASOF', '1')
-localStorage.setItem('DOM_PASOF', '12')
-localStorage.setItem('CZE_PASOF', '12')
-localStorage.setItem('ROU_PASOF', '12')
-localStorage.setItem('RWA_PASOF', '1')
-localStorage.setItem('RUS_PASOF', '12')
-localStorage.setItem('SLB_PASOF', '1')
-localStorage.setItem('WSM_PASOF', '1')
-localStorage.setItem('SMR_PASOF', '15')
-localStorage.setItem('LCA_PASOF', '12')
-localStorage.setItem('KNA_PASOF', '12')
-localStorage.setItem('STP_PASOF', '12')
-localStorage.setItem('VCT_PASOF', '12')
-localStorage.setItem('SEN_PASOF', '12')
-localStorage.setItem('SLE_PASOF', '1')
-localStorage.setItem('SRB_PASOF', '12')
-localStorage.setItem('SYC_PASOF', '12')
-localStorage.setItem('SGP_PASOF', '11')
-localStorage.setItem('SYR_PASOF', '1')
-localStorage.setItem('SOM_PASOF', '1')
-localStorage.setItem('LKA_PASOF', '12@')
-localStorage.setItem('SWZ_PASOF', '1')
-localStorage.setItem('SDN_PASOF', '11')
-localStorage.setItem('SSD_PASOF', '1')
-localStorage.setItem('SWE_PASOF', '12')
-localStorage.setItem('CHE_PASOF', '12')
-localStorage.setItem('SUR_PASOF', '9')
-localStorage.setItem('TJK_PASOF', '1')
-localStorage.setItem('THA_PASOF', '12')
-localStorage.setItem('TWN_PASOF', '16')
-localStorage.setItem('TZA_PASOF', '12')
-localStorage.setItem('TLS_PASOF', '1')
-localStorage.setItem('TGO_PASOF', '12')
-localStorage.setItem('TON_PASOF', '1')
-localStorage.setItem('TTO_PASOF', '12')
-localStorage.setItem('TUN_PASOF', '13')
-localStorage.setItem('TKM_PASOF', '1')
-localStorage.setItem('TUR_PASOF', '12')
-localStorage.setItem('TUV_PASOF', '1')
-localStorage.setItem('UKR_PASOF', '12')
-localStorage.setItem('UGA_PASOF', '1')
-localStorage.setItem('URY_PASOF', '15')
-localStorage.setItem('UZB_PASOF', '1')
-localStorage.setItem('VUT_PASOF', '1')
-localStorage.setItem('VAT_PASOF', '15')
-localStorage.setItem('VEN_PASOF', '9')
-localStorage.setItem('VNM_PASOF', '12')
-localStorage.setItem('ZMB_PASOF', '12')
-
-//VIVIS
-localStorage.setItem('AFG_VIVIS', '1')
-localStorage.setItem('ZAF_VIVIS', '8')
-localStorage.setItem('ALB_VIVIS', '8*')
-localStorage.setItem('DEU_VIVIS', '8*')
-localStorage.setItem('AND_VIVIS', '8')
-localStorage.setItem('AGO_VIVIS', '1')
-localStorage.setItem('ATG_VIVIS', '8')
-localStorage.setItem('SAU_VIVIS', '1')
-localStorage.setItem('DZA_VIVIS', '1')
-localStorage.setItem('ARG_VIVIS', '8#')
-localStorage.setItem('ARM_VIVIS', '8')
-localStorage.setItem('AUS_VIVIS', '8')
-localStorage.setItem('AUT_VIVIS', '8')
-localStorage.setItem('AZE_VIVIS', '1')
-localStorage.setItem('BHS_VIVIS', '8')
-localStorage.setItem('BHR_VIVIS', '1')
-localStorage.setItem('BGD_VIVIS', '1')
-localStorage.setItem('BRB_VIVIS', '8')
-localStorage.setItem('BLR_VIVIS', '8')
-localStorage.setItem('BEL_VIVIS', '8*')
-localStorage.setItem('BLZ_VIVIS', '8')
-localStorage.setItem('BEN_VIVIS', '1')
-localStorage.setItem('BOL_VIVIS', '8#')
-localStorage.setItem('BIH_VIVIS', '8')
-localStorage.setItem('BWA_VIVIS', '1')
-localStorage.setItem('BRN_VIVIS', '1')
-localStorage.setItem('BGR_VIVIS', '8*')
-localStorage.setItem('BFA_VIVIS', '1')
-localStorage.setItem('BDI_VIVIS', '1')
-localStorage.setItem('BTN_VIVIS', '1')
-localStorage.setItem('CPV_VIVIS', '1')
-localStorage.setItem('KHM_VIVIS', '1')
-localStorage.setItem('CMR_VIVIS', '1')
-localStorage.setItem('CAN_VIVIS', '8')
-localStorage.setItem('QAT_VIVIS', '1')
-localStorage.setItem('KAZ_VIVIS', '2')
-localStorage.setItem('TCD_VIVIS', '1')
-localStorage.setItem('CHL_VIVIS', '8#')
-localStorage.setItem('CHN_VIVIS', '1')
-localStorage.setItem('CYP_VIVIS', '8*')
-localStorage.setItem('COL_VIVIS', '8#')
-localStorage.setItem('COM_VIVIS', '1')
-localStorage.setItem('COG_VIVIS', '1')
-localStorage.setItem('COD_VIVIS', '1')
-localStorage.setItem('COK_VIVIS', '1')
-localStorage.setItem('PRK_VIVIS', '1')
-localStorage.setItem('KOR_VIVIS', '8')
-localStorage.setItem('CIV_VIVIS', '1')
-localStorage.setItem('CRI_VIVIS', '8')
-localStorage.setItem('HRV_VIVIS', '8')
-localStorage.setItem('CUB_VIVIS', '1')
-localStorage.setItem('DNK_VIVIS', '8*')
-localStorage.setItem('DJI_VIVIS', '1')
-localStorage.setItem('DMA_VIVIS', '8*')
-localStorage.setItem('EGY_VIVIS', '1')
-localStorage.setItem('SLV_VIVIS', '8')
-localStorage.setItem('ARE_VIVIS', '8')
-localStorage.setItem('ECU_VIVIS', '8#')
-localStorage.setItem('ERI_VIVIS', '1')
-localStorage.setItem('SVK_VIVIS', '8')
-localStorage.setItem('SVN_VIVIS', '8*')
-localStorage.setItem('ESP_VIVIS', '8')
-localStorage.setItem('USA_VIVIS', '8')
-localStorage.setItem('EST_VIVIS', '8*')
-localStorage.setItem('ETH_VIVIS', '1')
-localStorage.setItem('FJI_VIVIS', '8')
-localStorage.setItem('PHL_VIVIS', '8')
-localStorage.setItem('FIN_VIVIS', '8')
-localStorage.setItem('FRA_VIVIS', '8*')
-localStorage.setItem('GAB_VIVIS', '1')
-localStorage.setItem('GMB_VIVIS', '1')
-localStorage.setItem('GHA_VIVIS', '1')
-localStorage.setItem('GEO_VIVIS', '8*')
-localStorage.setItem('GRD_VIVIS', '8')
-localStorage.setItem('GRC_VIVIS', '8*')
-localStorage.setItem('GTM_VIVIS', '8')
-localStorage.setItem('GUY_VIVIS', '8')
-localStorage.setItem('GIN_VIVIS', '1')
-localStorage.setItem('GNB_VIVIS', '1')
-localStorage.setItem('GNQ_VIVIS', '1')
-localStorage.setItem('HTI_VIVIS', '1')
-localStorage.setItem('HND_VIVIS', '8')
-localStorage.setItem('HKG_VIVIS', '8')
-localStorage.setItem('HUN_VIVIS', '8*')
-localStorage.setItem('YEM_VIVIS', '1')
-localStorage.setItem('IND_VIVIS', '1')
-localStorage.setItem('IDN_VIVIS', '2')
-localStorage.setItem('IRN_VIVIS', '1')
-localStorage.setItem('IRQ_VIVIS', '1')
-localStorage.setItem('IRL_VIVIS', '8')
-localStorage.setItem('ISL_VIVIS', '8')
-localStorage.setItem('ISR_VIVIS', '8')
-localStorage.setItem('ITA_VIVIS', '8*')
-localStorage.setItem('JAM_VIVIS', '8')
-localStorage.setItem('JPN_VIVIS', '8')
-localStorage.setItem('JOR_VIVIS', '1')
-localStorage.setItem('KIR_VIVIS', '1')
-localStorage.setItem('KOS_VIVIS', '16')
-localStorage.setItem('KWT_VIVIS', '1')
-localStorage.setItem('LAO_VIVIS', '1')
-localStorage.setItem('LSO_VIVIS', '1')
-localStorage.setItem('LVA_VIVIS', '8*')
-localStorage.setItem('LBN_VIVIS', '1')
-localStorage.setItem('LBR_VIVIS', '1')
-localStorage.setItem('LBY_VIVIS', '1')
-localStorage.setItem('LIE_VIVIS', '8')
-localStorage.setItem('LTU_VIVIS', '8*')
-localStorage.setItem('LUX_VIVIS', '8*')
-localStorage.setItem('MAC_VIVIS', '8')
-localStorage.setItem('MKD_VIVIS', '8*')
-localStorage.setItem('MDG_VIVIS', '1')
-localStorage.setItem('MYS_VIVIS', '8')
-localStorage.setItem('MWI_VIVIS', '1')
-localStorage.setItem('MDV_VIVIS', '1')
-localStorage.setItem('MLI_VIVIS', '1')
-localStorage.setItem('MLT_VIVIS', '8*')
-localStorage.setItem('MNP_VIVIS', '1')
-localStorage.setItem('MAR_VIVIS', '8')
-localStorage.setItem('MHL_VIVIS', '1')
-localStorage.setItem('MUS_VIVIS', '1')
-localStorage.setItem('MRT_VIVIS', '1')
-localStorage.setItem('MEX_VIVIS', '8')
-localStorage.setItem('FSM_VIVIS', '1')
-localStorage.setItem('MOZ_VIVIS', '1')
-localStorage.setItem('MDA_VIVIS', '1')
-localStorage.setItem('MCO_VIVIS', '8')
-localStorage.setItem('MNG_VIVIS', '8')
-localStorage.setItem('MNE_VIVIS', '8*')
-localStorage.setItem('MMR_VIVIS', '1')
-localStorage.setItem('NAM_VIVIS', '8')
-localStorage.setItem('NRU_VIVIS', '1')
-localStorage.setItem('NPL_VIVIS', '1')
-localStorage.setItem('NIC_VIVIS', '8')
-localStorage.setItem('NER_VIVIS', '1')
-localStorage.setItem('NGA_VIVIS', '1')
-localStorage.setItem('NOR_VIVIS', '8')
-localStorage.setItem('NZL_VIVIS', '8')
-localStorage.setItem('OMN_VIVIS', '1')
-localStorage.setItem('OSMM_VIVIS', '8')
-localStorage.setItem('NLD_VIVIS', '8*')
-localStorage.setItem('PLW_VIVIS', '1')
-localStorage.setItem('PSE_VIVIS', '1')
-localStorage.setItem('PAN_VIVIS', '8')
-localStorage.setItem('PNG_VIVIS', '1')
-localStorage.setItem('PAK_VIVIS', '1')
-localStorage.setItem('PRY_VIVIS', '8#')
-localStorage.setItem('PER_VIVIS', '8#')
-localStorage.setItem('POL_VIVIS', '8')
-localStorage.setItem('PRT_VIVIS', '8')
-localStorage.setItem('KEN_VIVIS', '1')
-localStorage.setItem('KGZ_VIVIS', '1')
-localStorage.setItem('GBR_VIVIS', '8')
-localStorage.setItem('RASD_VIVIS', '17')
-localStorage.setItem('CAF_VIVIS', '1')
-localStorage.setItem('DOM_VIVIS', '1')
-localStorage.setItem('CZE_VIVIS', '8*')
-localStorage.setItem('ROU_VIVIS', '8')
-localStorage.setItem('RWA_VIVIS', '1')
-localStorage.setItem('RUS_VIVIS', '8')
-localStorage.setItem('SLB_VIVIS', '1')
-localStorage.setItem('WSM_VIVIS', '1')
-localStorage.setItem('SMR_VIVIS', '8')
-localStorage.setItem('LCA_VIVIS', '1')
-localStorage.setItem('KNA_VIVIS', '8')
-localStorage.setItem('STP_VIVIS', '1')
-localStorage.setItem('VCT_VIVIS', '8')
-localStorage.setItem('SEN_VIVIS', '1')
-localStorage.setItem('SLE_VIVIS', '1')
-localStorage.setItem('SRB_VIVIS', '8')
-localStorage.setItem('SYC_VIVIS', '8*')
-localStorage.setItem('SGP_VIVIS', '2')
-localStorage.setItem('SYR_VIVIS', '1')
-localStorage.setItem('SOM_VIVIS', '1')
-localStorage.setItem('LKA_VIVIS', '1')
-localStorage.setItem('SWZ_VIVIS', '1')
-localStorage.setItem('SDN_VIVIS', '1')
-localStorage.setItem('SSD_VIVIS', '1')
-localStorage.setItem('SWE_VIVIS', '8*')
-localStorage.setItem('CHE_VIVIS', '8*')
-localStorage.setItem('SUR_VIVIS', '8')
-localStorage.setItem('TJK_VIVIS', '1')
-localStorage.setItem('THA_VIVIS', '8')
-localStorage.setItem('TWN_VIVIS', '18')
-localStorage.setItem('TZA_VIVIS', '1')
-localStorage.setItem('TLS_VIVIS', '1')
-localStorage.setItem('TGO_VIVIS', '1')
-localStorage.setItem('TON_VIVIS', '1')
-localStorage.setItem('TTO_VIVIS', '8')
-localStorage.setItem('TUN_VIVIS', '8')
-localStorage.setItem('TKM_VIVIS', '1')
-localStorage.setItem('TUR_VIVIS', '8')
-localStorage.setItem('TUV_VIVIS', '1')
-localStorage.setItem('UKR_VIVIS', '8*')
-localStorage.setItem('UGA_VIVIS', '1')
-localStorage.setItem('URY_VIVIS', '8#')
-localStorage.setItem('UZB_VIVIS', '1')
-localStorage.setItem('VUT_VIVIS', '1')
-localStorage.setItem('VAT_VIVIS', '8')
-localStorage.setItem('VEN_VIVIS', '7#')
-localStorage.setItem('VNM_VIVIS', '1')
-localStorage.setItem('ZMB_VIVIS', '1')
+// Método para imprimir a mensagem dos marítimos
+function imprimeMaritimo(sid, necessita_visto) {
+    // sid true = país signatário
+    // necessita_visto true = pax precisa de visto de visita
+    texto = "<p>Se o viajante possuir RNM/RNE ou visto de <b>negócios</b> no passaporte válido:<br>";
+    texto += "<ul><li>RNM/RNE: classificar com o código 100</li>";
+    texto += "<li>VIVIS <b>(negócios)</b>: classificar com o código 102</li>";
+    texto += "<li>VITEM: classificar com o código 201</li></ul></p>";
+    texto += "<p><b>SENÃO:</b></p>";
+    texto += "<p>";
+    if (sid == true) {
+        texto += "Se o viajante estiver portando a Seafearer's ID (SID):<br>" +
+            "<ul><li>Para estadia de até 90 dias classificar com o código 118.</li>" +
+            "<li>Para estadia entre 90 e 180 dias classificar com o código 130.</li>" +
+            "<li>No caso de estadia SUPERIOR a 180 dias o VISTO É NECESSÁRIO.</li></ul></p>" +
+            "<p>Se o viajante não estiver portando a Seafearer's ID (SID):<br>";
+    }
+    if (necessita_visto == true) {
+        texto += "<ul><li><b>Visto EXIGIDO.</b></li></ul>";
+    } else {
+        texto += "<ul><li>Para estadia de até 90 dias, comprovada pela carta da empresa para a qual irá trabalhar, classificar com o código 118.</li>" +
+            "<li>Para estadia SUPERIOR a 90 dias o VISTO É NECESSÁRIO.</li></ul>";
+    }
+    texto += '</p>';
+    return texto;
+}
